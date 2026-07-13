@@ -11,7 +11,7 @@ function registerSettingsCommands() {
 
   // 注册选择书籍目录命令
   commands.push(
-    vscode.commands.registerCommand('workchill.selectBookFolder', async () => {
+    vscode.commands.registerCommand('imfish.selectBookFolder', async () => {
       const folderUri = await vscode.window.showOpenDialog({
         canSelectFiles: false,
         canSelectFolders: true,
@@ -27,7 +27,7 @@ function registerSettingsCommands() {
 
   // 注册设置面板命令
   commands.push(
-    vscode.commands.registerCommand('workchill.showSettings', () => {
+    vscode.commands.registerCommand('imfish.showSettings', () => {
       const context = getExtensionContext();
       if (!context) {
         vscode.window.showErrorMessage('Extension context not available');
@@ -35,8 +35,8 @@ function registerSettingsCommands() {
       }
 
       const panel = vscode.window.createWebviewPanel(
-        'workchillSettings',
-        'Workchill Settings',
+        'imfishSettings',
+        'imFish Book 设置',
         vscode.ViewColumn.One,
         {
           enableScripts: true,
@@ -64,9 +64,10 @@ function registerSettingsCommands() {
       panel.webview.postMessage({
         command: 'updateSettings',
         settings: {
-          linesPerPage: config.get('linesPerPage') || 1,
           fontSize: config.get('fontSize') || 14,
           fontColor: config.get('fontColor') || '#A8A8A8',
+          autoWrap: config.get('autoWrap') !== false,
+          maxCharsPerPage: config.get('maxCharsPerPage') || 50,
           bookFolderPath: getBookFolderPath()
         },
       });

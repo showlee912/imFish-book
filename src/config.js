@@ -6,6 +6,9 @@ let bookFolderPath;
 let linesPerPage;
 let fontSize;
 let fontColor;
+let autoWrap;
+let maxCharsPerLine;
+let maxCharsPerPage;
 let configChangeListeners = [];
 
 /**
@@ -13,13 +16,17 @@ let configChangeListeners = [];
  * @param {vscode.ExtensionContext} context 扩展上下文
  */
 function initializeConfig(context) {
-  config = vscode.workspace.getConfiguration('workchill');
-  bookFolderPath = config.get('bookFolder') || context.extensionPath;
-  linesPerPage = config.get('linesPerPage') || 1;
+  config = vscode.workspace.getConfiguration('imfish');
+  // 未设置时保持空字符串，不回落到扩展目录（与「开始阅读」校验一致）
+  bookFolderPath = config.get('bookFolder') || '';
+  linesPerPage = config.get('linesPerPage') || 200;
   fontSize = config.get('fontSize') || 14;
   fontColor = config.get('fontColor') || '#A8A8A8';
-  
-  // 监听配置变更
+  autoWrap = config.get('autoWrap') !== false;
+  const lineChars = config.get('maxCharsPerLine');
+  maxCharsPerLine = typeof lineChars === 'number' ? lineChars : 0;
+  maxCharsPerPage = config.get('maxCharsPerPage') || 50;
+
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(handleConfigChange)
   );
@@ -30,27 +37,50 @@ function initializeConfig(context) {
  * @param {vscode.ConfigurationChangeEvent} event 配置变更事件
  */
 function handleConfigChange(event) {
-  if (event.affectsConfiguration('workchill')) {
-    config = vscode.workspace.getConfiguration('workchill');
+  if (event.affectsConfiguration('imfish')) {
+    config = vscode.workspace.getConfiguration('imfish');
 
-    if (event.affectsConfiguration('workchill.bookFolder')) {
-      bookFolderPath = config.get('bookFolder');
+    if (event.affectsConfiguration('imfish.bookFolder')) {
+      bookFolderPath = config.get('bookFolder') || '';
     }
-    
-    if (event.affectsConfiguration('workchill.linesPerPage')) {
-      linesPerPage = config.get('linesPerPage');
+
+    if (event.affectsConfiguration('imfish.linesPerPage')) {
+      linesPerPage = config.get('linesPerPage') || 200;
       notifyConfigChange('linesPerPage', linesPerPage);
     }
 
-    if (event.affectsConfiguration('workchill.fontSize')) {
+    if (event.affectsConfiguration('imfish.fontSize')) {
       fontSize = config.get('fontSize');
       notifyConfigChange('fontSize', fontSize);
     }
 
-    if (event.affectsConfiguration('workchill.fontColor')) {
+    if (event.affectsConfiguration('imfish.fontColor')) {
       fontColor = config.get('fontColor');
       notifyConfigChange('fontColor', fontColor);
     }
+
+    if (event.affectsConfiguration('imfish.autoWrap')) {
+      autoWrap = config.get('autoWrap') !== false;
+      notifyConfigChange('autoWrap', autoWrap);
+    }
+
+    if (event.affectsConfiguration('imfish.maxCharsPerLine')) {
+      const lineChars = config.get('maxCharsPerLine');
+      maxCharsPerLine = typeof lineChars === 'number' ? lineChars : 0;
+      notifyConfigChange('maxCharsPerLine', maxCharsPerLine);
+    }
+
+    if (event.affectsConfiguration('imfish.maxCharsPerPage')) {
+      maxCharsPerPage = config.get('maxCharsPerPage') || 50;
+      notifyConfigChange('maxCharsPerPage', maxCharsPerPage);
+    }
+  }
+
+  if (
+    event.affectsConfiguration('editor.wordWrapColumn') ||
+    event.affectsConfiguration('editor.fontSize')
+  ) {
+    notifyConfigChange('editorLayout', null);
   }
 }
 
@@ -79,6 +109,7 @@ function notifyConfigChange(key, value) {
  * @param {any} value 配置值
  */
 async function updateConfig(key, value) {
+  config = vscode.workspace.getConfiguration('imfish');
   await config.update(key, value, true);
   return value;
 }
@@ -90,6 +121,9 @@ module.exports = {
   getLinesPerPage: () => linesPerPage,
   getFontSize: () => fontSize,
   getFontColor: () => fontColor,
+  getAutoWrap: () => autoWrap,
+  getMaxCharsPerLine: () => maxCharsPerLine,
+  getMaxCharsPerPage: () => maxCharsPerPage,
   updateConfig,
   addConfigChangeListener
-}; 
+};

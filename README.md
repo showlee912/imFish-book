@@ -1,88 +1,61 @@
-# Workchill Reader - VSCode Extension
+# imFish Book
 
-一个用来上班摸鱼的 VSCode 阅读插件。支持在编辑区域阅读本地 txt、epub 小说。隐蔽性极高，支持自动保存阅读进度，设置每次展示行数，设置字体大小，颜色等。
+在编辑器里本地读 txt/epub：自动进度、窗口折行、快捷键翻页，摸鱼更隐蔽。
 
-## 效果预览
+## 亮点
 
-### 阅读界面(每页读一行)
-![阅读界面](https://github.com/user-attachments/assets/f3a2db4c-c4d2-48dc-a006-40811277c2a0)
+1. **编辑器内伪装阅读**  
+   文字直接叠在当前编辑器里显示，不像普通阅读器开独立面板，摸鱼更隐蔽。
 
-### 阅读界面(每页读三行)
-![阅读界面](https://github.com/user-attachments/assets/3287b1c7-25dc-4de8-ac0e-56eb9101887d)
+2. **本地 txt / epub 通吃**  
+   选本地书库目录即可；epub 会在同目录生成同名 txt 再读，进度仍可续。
 
-### 设置界面
-![设置界面](https://github.com/user-attachments/assets/1ed4cefc-70db-4671-8cb5-eea8211d957b)
+3. **进度可存、可调**  
+   自动记住读到哪；设置页还能按百分比手动跳进度。
 
+4. **按窗口自动折行**  
+   长句跟编辑器宽度走，不用死记每行字数。
 
-## 功能特性
+5. **快捷键翻页，操作短**  
+   `Alt+]` / `Alt+[` 翻页，`End` 停止；开始阅读不弹确认窗，降低暴露。
 
-- 支持 txt 和 epub 格式的本地小说阅读
-- 自动保存阅读进度，可以继续上次阅读位置
-- 支持上下翻页快捷键操作
-- 可自定义书籍目录
-- 可配置每页显示行数
-- 支持自定义阅读字体大小
-- 支持自定义阅读字体颜色
-- 支持浅色/深色主题自适应
-- epub 文件自动转换为 txt 格式
+6. **侧边栏一站入口**  
+   活动栏有 imFish Book：打开设置 / 开始阅读 / 停止阅读。
 
-## 使用说明
+7. **设置页跟 VS Code 主题走**  
+   深色卡片布局，和编辑器视觉一体；字号、颜色、翻页字数可配。
 
-直接在代码编辑区域鼠标右键，选择 workchill show settings 打开设置页面
-![1736815976806](https://github.com/user-attachments/assets/cd38789a-7671-4e64-b1f2-d5db2ab8ded9)
+8. **完全本地、无账号**  
+   书在本机，不依赖云服务。
 
-或者通过命令的方式：
-1. 按 `Ctrl + Shift + P` (mac 是 `Cmd + Shift + P`) 打开命令面板
-2. 输入 `workchill show settings` 打开设置页面
-   - 点击选择目录，选择一个书籍目录（默认插件根目录）
-   - 可以设置每页显示行数
-   - 可以设置阅读字体大小
-   - 可以设置阅读字体颜色
-   - 可以查看和管理书籍列表
-3. 选择要阅读的书籍
-   - 点击"开始阅读"从头开始
-   - 点击"继续阅读"从上次位置继续
-4. 在编辑器代码页面随便选中一行（使编辑器聚焦），按 Page Up/Page Down 键进行翻页阅读（注意不是上下箭头，是page up， page down）
-5. 使用 End 键停止阅读
+## 安装
 
+在 VS Code 扩展市场搜索 **imFish Book**，或安装 ID：`showlee912.imfish-book`。安装后请 **Reload Window**。
 
-## 命令说明
+## 使用
 
-| 命令 | 描述 | 快捷键 |
-|------|------|--------|
-| workchill show settings | 显示设置页面 | 无 |
-| workchill next line | 下一页 | Page Down |
-| workchill previous line | 上一页 | Page Up |
-| workchill start reading | 开始阅读 | 无 |
-| workchill stop reading | 停止阅读 | End |
-| workchill select book folder | 选择书籍目录 | 无 |
+1. 点击左侧活动栏 **imFish Book** 图标 → **打开设置**
+2. 或 `Ctrl+Shift+P` → `imFish 打开设置`
+3. 选择书籍目录，配置每次翻页字数、字体颜色等，点「保存设置」
+4. 「继续阅读」或侧边栏「开始 / 继续阅读」；开始阅读不会弹确认提示
+5. 编辑器聚焦时翻页：
+   - 下一页：`Alt+]`
+   - 上一页：`Alt+[`
+   - 停止：`End`
 
+设置页可为每本书手动「设置当前进度为」某百分比后点「应用」。
 
-## 配置项
+## 配置
 
-| 配置项 | 类型 | 默认值 | 描述 |
-|--------|------|--------|------|
-| workchill.bookFolder | string | "" | 书籍文件根目录 |
-| workchill.linesPerPage | number | 1 | 每次显示的行数 |
-| workchill.fontSize | number | 14 | 阅读文字大小(px) |
-| workchill.fontColor | string | "#A8A8A8" | 阅读文字颜色 |
-
-
-## 注意事项
-
-1. epub 文件首次打开时会自动转换为同名的 txt 文件，实际阅读的是转换后的 txt 文件
-2. 阅读进度会自动保存，重启 VSCode 后仍然有效
-3. 字体颜色设置支持任何有效的 CSS 颜色值（如：#FF0000、rgb(255,0,0)等）
-4. 字体大小建议设置在 8-72px 之间以获得最佳阅读体验
-
-## 问题反馈
-
-如果你在使用过程中遇到任何问题，或者有功能建议，欢迎在 GitHub 仓库提交 Issue：
-[https://github.com/tong822218/workchill-reader-vscode-extensions](https://github.com/tong822218/workchill-reader-vscode-extensions)
-
-weixin: tong822527
-email: 327637616@qq.com
-
+| 配置项 | 默认 | 说明 |
+|------|------|------|
+| `imfish.bookFolder` | `""` | 书籍目录；未设置时开始阅读会提示先选择 |
+| `imfish.maxCharsPerPage` | `50` | 每次翻页显示多少字（设置页主选项） |
+| `imfish.autoWrap` | `true` | 长句是否按窗口自动换行 |
+| `imfish.maxCharsPerLine` | `0` | 高级：每行字数；`0`=跟窗口（设置页已隐藏） |
+| `imfish.linesPerPage` | `200` | 高级：跨原书行上限（设置页已隐藏） |
+| `imfish.fontSize` | `14` | 阅读文字大小 |
+| `imfish.fontColor` | `#A8A8A8` | 阅读文字颜色 |
 
 ## License
 
