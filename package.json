@@ -2,7 +2,7 @@
   "name": "imfishbook",
   "displayName": "imFishBook",
   "description": "在编辑器里本地读 txt/epub：自动进度、窗口折行、快捷键翻页，摸鱼更隐蔽。",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publisher": "showlee912",
   "license": "MIT",
   "engines": {
