@@ -1,7 +1,5 @@
 const MIN_WIDTH_UNITS = 12;
 const DEFAULT_WRAP_COLUMN = 80;
-/** 装饰左边距约 2em，按宽度单位扣除 */
-const MARGIN_WIDTH_UNITS = 4;
 
 /**
  * 判断字符是否按全角宽度计量（CJK / 全角符号等）
@@ -40,16 +38,7 @@ function measureWidth(text) {
 }
 
 /**
- * 是否适合作为优先断行点
- * @param {string} char 字符
- * @returns {boolean}
- */
-function isBreakOpportunity(char) {
-  return /\s/.test(char) || /[，。！？；：、,.!?;:\-—…」』》】）\])]/.test(char);
-}
-
-/**
- * 按最大宽度单位软折行；优先在空格/标点处断开，否则硬切
+ * 按最大宽度单位硬折行（不按标点/空格优先断行）
  * @param {string} text 原始文本
  * @param {number} maxWidthUnits 最大宽度单位
  * @returns {string[]}
@@ -66,32 +55,18 @@ function wrapText(text, maxWidthUnits) {
   const chunks = [];
   let current = '';
   let currentWidth = 0;
-  let lastBreakIndex = -1;
 
   for (const char of text) {
     const charWidth = isWideChar(char) ? 2 : 1;
     if (currentWidth + charWidth > limit && current.length > 0) {
-      if (lastBreakIndex >= 0) {
-        chunks.push(current.slice(0, lastBreakIndex + 1).trimEnd());
-        current = current.slice(lastBreakIndex + 1) + char;
-        currentWidth = measureWidth(current);
-      } else {
-        chunks.push(current);
-        current = char;
-        currentWidth = charWidth;
-      }
-      lastBreakIndex = -1;
-      if (isBreakOpportunity(char)) {
-        lastBreakIndex = current.length - 1;
-      }
+      chunks.push(current);
+      current = char;
+      currentWidth = charWidth;
       continue;
     }
 
     current += char;
     currentWidth += charWidth;
-    if (isBreakOpportunity(char)) {
-      lastBreakIndex = current.length - 1;
-    }
   }
 
   if (current) {
@@ -119,7 +94,7 @@ function estimateMaxWidthUnits(editor, readingFontSize, maxCharsPerLine = 0) {
   const editorFontSize = editorConfig.get('fontSize') || 14;
   const fontSize = readingFontSize || 14;
   const ratio = editorFontSize / fontSize;
-  const estimated = Math.floor(wrapColumn * ratio) - MARGIN_WIDTH_UNITS;
+  const estimated = Math.floor(wrapColumn * ratio);
 
   // 若文档行较短，略收紧估算，减少横向溢出观感
   if (editor && editor.document.lineCount > 0) {
@@ -136,6 +111,32 @@ function estimateMaxWidthUnits(editor, readingFontSize, maxCharsPerLine = 0) {
 }
 
 /**
+ * 从锚点列起估算可用宽度单位（扣掉行前缀已占用宽度）
+ * @param {import('vscode').TextEditor|undefined} editor
+ * @param {number} readingFontSize
+ * @param {number} prefixWidth 锚点前缀的显示宽度单位
+ * @param {number} maxCharsPerLine 手动覆盖；0 表示自动
+ * @returns {number}
+ */
+function estimateAvailableWidthUnits(editor, readingFontSize, prefixWidth = 0, maxCharsPerLine = 0) {
+  const base = estimateMaxWidthUnits(editor, readingFontSize, maxCharsPerLine);
+  return Math.max(MIN_WIDTH_UNITS, base - Math.max(0, prefixWidth || 0));
+}
+
+/**
+ * 从锚点列起估算可用字数（码点）
+ * @param {import('vscode').TextEditor|undefined} editor
+ * @param {number} readingFontSize
+ * @param {number} prefixCharCount 锚点前缀码点数
+ * @param {number} maxCharsPerLine 手动覆盖；0 表示自动
+ * @returns {number}
+ */
+function estimateAvailableCharsPerLine(editor, readingFontSize, prefixCharCount = 0, maxCharsPerLine = 0) {
+  const base = estimateMaxCharsPerLine(editor, readingFontSize, maxCharsPerLine);
+  return Math.max(1, base - Math.max(0, prefixCharCount || 0));
+}
+
+/**
  * 按 Unicode 码点计字数
  * @param {string} text
  * @returns {number}
@@ -148,7 +149,7 @@ function countChars(text) {
 }
 
 /**
- * 按最大字数软折行（一个汉字算 1）
+ * 按最大字数硬折行（一个汉字算 1；不按标点优先断行）
  * @param {string} text
  * @param {number} maxChars
  * @returns {string[]}
@@ -164,30 +165,8 @@ function wrapByCharCount(text, maxChars) {
   }
 
   const chunks = [];
-  let current = [];
-  let lastBreak = -1;
-
-  for (let i = 0; i < chars.length; i++) {
-    const char = chars[i];
-    current.push(char);
-    if (isBreakOpportunity(char)) {
-      lastBreak = current.length - 1;
-    }
-
-    if (current.length >= limit) {
-      if (lastBreak >= 0 && lastBreak < current.length - 1) {
-        chunks.push(current.slice(0, lastBreak + 1).join('').trimEnd());
-        current = current.slice(lastBreak + 1);
-      } else {
-        chunks.push(current.join(''));
-        current = [];
-      }
-      lastBreak = -1;
-    }
-  }
-
-  if (current.length > 0) {
-    chunks.push(current.join(''));
+  for (let i = 0; i < chars.length; i += limit) {
+    chunks.push(chars.slice(i, i + limit).join(''));
   }
 
   return chunks.length > 0 ? chunks : [''];
@@ -217,5 +196,7 @@ module.exports = {
   countChars,
   estimateMaxWidthUnits,
   estimateMaxCharsPerLine,
+  estimateAvailableWidthUnits,
+  estimateAvailableCharsPerLine,
   MIN_WIDTH_UNITS
 };

@@ -14,8 +14,9 @@ const {
   wrapText,
   wrapByCharCount,
   countChars,
-  estimateMaxWidthUnits,
-  estimateMaxCharsPerLine
+  measureWidth,
+  estimateAvailableWidthUnits,
+  estimateAvailableCharsPerLine
 } = require('../utils/textWrap');
 const { resolveTargetEditor, ensureFocusedTextEditor, isReadableDocument } = require('../utils/editorFocus');
 
@@ -199,12 +200,13 @@ class BookReader {
   }
 
   /**
-   * 将本页文本折成装饰片段
+   * 将本页文本折成装饰片段（按锚点列扣减前缀已占用宽度）
    * @param {import('vscode').TextEditor} editor
    * @param {string} pageText
+   * @param {number} [anchorColumn=0] 光标列（字符偏移）
    * @returns {string[]}
    */
-  wrapPageText(editor, pageText) {
+  wrapPageText(editor, pageText, anchorColumn = 0) {
     if (!pageText) {
       return [];
     }
@@ -213,12 +215,25 @@ class BookReader {
       return [pageText];
     }
 
+    const lineIndex = Math.min(
+      Math.max(0, editor.selection.active.line),
+      Math.max(0, editor.document.lineCount - 1)
+    );
+    const lineText = editor.document.lineAt(lineIndex).text;
+    const prefixEnd = Math.min(Math.max(0, anchorColumn || 0), lineText.length);
+    const prefix = lineText.slice(0, prefixEnd);
+    const prefixWidth = measureWidth(prefix);
+    const prefixChars = countChars(prefix);
+
     const maxPerLine = getMaxCharsPerLine();
     if (maxPerLine && maxPerLine > 0) {
-      return wrapByCharCount(pageText, estimateMaxCharsPerLine(editor, getFontSize(), maxPerLine));
+      return wrapByCharCount(
+        pageText,
+        estimateAvailableCharsPerLine(editor, getFontSize(), prefixChars, maxPerLine)
+      );
     }
 
-    const widthUnits = estimateMaxWidthUnits(editor, getFontSize(), 0);
+    const widthUnits = estimateAvailableWidthUnits(editor, getFontSize(), prefixWidth, 0);
     return wrapText(pageText, widthUnits);
   }
 
@@ -241,33 +256,35 @@ class BookReader {
   }
 
   /**
-   * 显示当前页
+   * 显示当前页（锚定到当前光标列；折行后各行同列对齐，短行夹到行尾）
    */
   showCurrentLine() {
     this.persistProgress();
 
     const editor = resolveTargetEditor();
     if (!editor) {
-      vscode.window.showWarningMessage('请先打开并聚焦一个文本文件，再继续阅读（文字会显示在编辑器行尾）');
+      vscode.window.showWarningMessage('请先打开并聚焦一个文本文件，再继续阅读（文字会显示在光标位置）');
       return;
     }
 
     this.clearDecorations();
 
     const page = this.takePageContent();
-    const startPosition = editor.selection.active;
-    const displayChunks = this.wrapPageText(editor, page.text);
+    const anchor = editor.selection.active;
+    const displayChunks = this.wrapPageText(editor, page.text, anchor.character);
     const decorations = [];
     const fontSize = getFontSize();
     const fontColor = getFontColor();
 
     for (let i = 0; i < displayChunks.length; i++) {
-      const lineNumber = startPosition.line + i;
+      const lineNumber = anchor.line + i;
       if (lineNumber >= editor.document.lineCount) {
         break;
       }
 
-      const position = new vscode.Position(lineNumber, 0);
+      const lineLength = editor.document.lineAt(lineNumber).text.length;
+      const col = Math.min(anchor.character, lineLength);
+      const position = new vscode.Position(lineNumber, col);
       decorations.push({
         range: new vscode.Range(position, position),
         renderOptions: {
@@ -277,7 +294,7 @@ class BookReader {
             fontWeight: 'normal',
             fontSize: `${fontSize}px`,
             color: fontColor,
-            margin: '0 0 0 2em',
+            margin: '0',
           }
         }
       });

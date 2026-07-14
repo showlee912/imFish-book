@@ -1,8 +1,8 @@
 {
-  "name": "imfish-book",
-  "displayName": "imFish Book",
+  "name": "imfishbook",
+  "displayName": "imFishBook",
   "description": "在编辑器里本地读 txt/epub：自动进度、窗口折行、快捷键翻页，摸鱼更隐蔽。",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "publisher": "showlee912",
   "license": "MIT",
   "engines": {
@@ -36,7 +36,7 @@
       "activitybar": [
         {
           "id": "imfish",
-          "title": "imFish Book",
+          "title": "imFishBook",
           "icon": "media/imfish.svg"
         }
       ]
@@ -98,7 +98,7 @@
       }
     ],
     "configuration": {
-      "title": "imFish Book",
+      "title": "imFishBook",
       "properties": {
         "imfish.bookFolder": {
           "type": "string",

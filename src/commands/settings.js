@@ -36,7 +36,7 @@ function registerSettingsCommands() {
 
       const panel = vscode.window.createWebviewPanel(
         'imfishSettings',
-        'imFish Book 设置',
+        'imFishBook 设置',
         vscode.ViewColumn.One,
         {
           enableScripts: true,

@@ -109,7 +109,7 @@ class ImFishSidebarProvider {
   </style>
 </head>
 <body>
-  <h2>imFish Book</h2>
+  <h2>imFishBook</h2>
   <p>本地摸鱼阅读。点下方按钮打开设置，管理书库与字数显示。</p>
   <div class="actions">
     <button class="primary" id="open-settings">打开设置</button>

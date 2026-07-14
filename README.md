@@ -1,4 +1,4 @@
-# imFish Book
+# imFishBook
 
 在编辑器里本地读 txt/epub：自动进度、窗口折行、快捷键翻页，摸鱼更隐蔽。
 
@@ -20,7 +20,7 @@
    `Alt+]` / `Alt+[` 翻页，`End` 停止；开始阅读不弹确认窗，降低暴露。
 
 6. **侧边栏一站入口**  
-   活动栏有 imFish Book：打开设置 / 开始阅读 / 停止阅读。
+   活动栏有 imFishBook：打开设置 / 开始阅读 / 停止阅读。
 
 7. **设置页跟 VS Code 主题走**  
    深色卡片布局，和编辑器视觉一体；字号、颜色、翻页字数可配。
@@ -30,11 +30,11 @@
 
 ## 安装
 
-在 VS Code 扩展市场搜索 **imFish Book**，或安装 ID：`showlee912.imfish-book`。安装后请 **Reload Window**。
+在 VS Code 扩展市场搜索 **imFishBook**，或安装 ID：`showlee912.imfishbook`。安装后请 **Reload Window**。
 
 ## 使用
 
-1. 点击左侧活动栏 **imFish Book** 图标 → **打开设置**
+1. 点击左侧活动栏 **imFishBook** 图标 → **打开设置**
 2. 或 `Ctrl+Shift+P` → `imFish 打开设置`
 3. 选择书籍目录，配置每次翻页字数、字体颜色等，点「保存设置」
 4. 「继续阅读」或侧边栏「开始 / 继续阅读」；开始阅读不会弹确认提示
